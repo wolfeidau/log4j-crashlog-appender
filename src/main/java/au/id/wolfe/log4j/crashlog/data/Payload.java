@@ -1,15 +1,23 @@
 package au.id.wolfe.log4j.crashlog.data;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
  *
  */
-public class Payload {
+public class Payload implements Serializable {
 
+    @JsonProperty
     private Notifier notifier;
+
+    @JsonProperty
     private Event event;
+
+    @JsonProperty
     private List<BackTraceEntry> backTrace = new LinkedList<BackTraceEntry>();
 
     public Payload() {

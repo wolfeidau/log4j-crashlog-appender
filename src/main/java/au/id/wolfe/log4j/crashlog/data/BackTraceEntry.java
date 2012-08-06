@@ -1,9 +1,11 @@
 package au.id.wolfe.log4j.crashlog.data;
 
+import java.io.Serializable;
+
 /**
  *
  */
-public class BackTraceEntry {
+public class BackTraceEntry implements Serializable {
 
     String file;
     Integer number;

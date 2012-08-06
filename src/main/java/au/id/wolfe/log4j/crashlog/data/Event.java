@@ -1,5 +1,8 @@
 package au.id.wolfe.log4j.crashlog.data;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -7,11 +10,16 @@ import java.util.Date;
  * "class_name": "RuntimeError",
  * "created_at" : "2012-08-03T12:34:19+10:00"
  */
-public class Event {
+public class Event implements Serializable {
 
-    String message;
-    String className;
-    Date createdAt;
+    @JsonProperty
+    private String message;
+
+    @JsonProperty
+    private String className;
+
+    @JsonProperty
+    private Date createdAt;
 
     public Event() {
     }

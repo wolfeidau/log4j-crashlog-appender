@@ -1,10 +1,15 @@
 package au.id.wolfe.log4j.crashlog.data;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import java.io.Serializable;
+
 /**
  *
  */
-public class CrashLogRecord {
+public class CrashLogRecord implements Serializable {
 
+    @JsonProperty
     private Payload payload;
 
     public CrashLogRecord() {

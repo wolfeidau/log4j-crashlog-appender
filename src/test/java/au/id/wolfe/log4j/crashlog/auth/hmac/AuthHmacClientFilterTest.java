@@ -1,49 +1,74 @@
 package au.id.wolfe.log4j.crashlog.auth.hmac;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
+import au.id.wolfe.log4j.crashlog.data.CrashLogRecord;
+import au.id.wolfe.log4j.crashlog.data.CrashLogResponse;
+import au.id.wolfe.log4j.crashlog.data.Event;
+import au.id.wolfe.log4j.crashlog.data.Payload;
+import au.id.wolfe.log4j.crashlog.json.SnakeCaseJsonProvider;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.LoggingFilter;
-import org.junit.Before;
+import com.sun.jersey.api.json.JSONConfiguration;
+import com.sun.jersey.test.framework.AppDescriptor;
+import com.sun.jersey.test.framework.JerseyTest;
+import com.sun.jersey.test.framework.WebAppDescriptor;
+import com.sun.jersey.test.framework.spi.container.TestContainerException;
+import com.sun.jersey.test.framework.spi.container.TestContainerFactory;
+import com.sun.jersey.test.framework.spi.container.http.HTTPContainerFactory;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
+import java.util.Date;
+
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.assertThat;
 
 /**
  *
  */
-public class AuthHmacClientFilterTest {
+public class AuthHmacClientFilterTest extends JerseyTest {
 
-    AuthHmacSecret authHmacSecret = new AuthHmacSecret()
+    private final AuthHmacSecret authHmacSecret = new AuthHmacSecret()
             .accessId("44CF9590006BF252F707")
             .secret("OtxrzxIsfpFjA7SwPzILwy8Bw21TLhquhboDYROV");
 
-    AuthHmacClientFilter authHmacClientFilter;
 
-    @Before
-    public void setUp() throws Exception {
-        authHmacClientFilter = new AuthHmacClientFilter(authHmacSecret);
+    @Override
+    protected AppDescriptor configure() {
+
+        ClientConfig cc = new DefaultClientConfig();
+        cc.getClasses().add(SnakeCaseJsonProvider.class);
+
+        return new WebAppDescriptor.Builder("au.id.wolfe.log4j.crashlog.auth.hmac.resource")
+                .initParam(JSONConfiguration.FEATURE_POJO_MAPPING, "true")
+                .clientConfig(cc)
+                .build();
     }
 
     @Test
     public void testHandle() throws Exception {
 
-        Client client = Client.create();
-        client.addFilter(new LoggingFilter());
+        final CrashLogRecord crashLogRecord = new CrashLogRecord();
 
-        WebResource resource;
-        String response;
-        resource = client.resource("http://localhost/quotes/nelson");
-        resource.addFilter(authHmacClientFilter);
-        response = resource.getRequestBuilder()
-                .header("X-Amz-Meta-Author", "foo@bar.com")
-                .header("X-Amz-Magic", "abracadabra")
-                .header("Date", "Thu, 17 Nov 2005 18:49:58 GMT")
-                .header("Content-Md5", "c8fdb181845a4ca6b8fec737b3581d76")
-                .type(MediaType.TEXT_HTML_TYPE)
-                .put(String.class);
+        crashLogRecord.setPayload(new Payload());
+        crashLogRecord.getPayload().setEvent(new Event());
+        crashLogRecord.getPayload().getEvent().setClassName("MyClass");
+        crashLogRecord.getPayload().getEvent().setCreatedAt(new Date());
 
-        System.out.println(response);
+        client().addFilter(new LoggingFilter());
+        client().addFilter(new AuthHmacClientFilter(authHmacSecret));
+
+        CrashLogResponse crashLogResponse = resource().path("/crashlog")
+                .getRequestBuilder()
+                .type(MediaType.APPLICATION_JSON)
+                .post(CrashLogResponse.class, crashLogRecord);
+
+        assertThat(crashLogResponse, notNullValue());
+
     }
 
-
+    @Override
+    protected TestContainerFactory getTestContainerFactory() throws TestContainerException {
+        return new HTTPContainerFactory();
+    }
 }

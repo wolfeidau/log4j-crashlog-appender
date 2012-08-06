@@ -1,9 +1,11 @@
 package au.id.wolfe.log4j.crashlog.data;
 
+import java.io.Serializable;
+
 /**
  *
  */
-public class Notifier {
+public class Notifier implements Serializable {
 
     String name;
     String version;
