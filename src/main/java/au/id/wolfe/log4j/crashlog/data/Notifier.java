@@ -1,5 +1,7 @@
 package au.id.wolfe.log4j.crashlog.data;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
 import java.io.Serializable;
 
 /**
@@ -7,7 +9,10 @@ import java.io.Serializable;
  */
 public class Notifier implements Serializable {
 
+    @JsonProperty("name")
     String name;
+
+    @JsonProperty("version")
     String version;
 
     public Notifier() {

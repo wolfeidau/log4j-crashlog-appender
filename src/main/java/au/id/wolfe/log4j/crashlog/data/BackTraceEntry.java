@@ -1,5 +1,7 @@
 package au.id.wolfe.log4j.crashlog.data;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
 import java.io.Serializable;
 
 /**
@@ -7,9 +9,14 @@ import java.io.Serializable;
  */
 public class BackTraceEntry implements Serializable {
 
-    String file;
-    Integer number;
-    String method;
+    @JsonProperty("file")
+    private String file;
+
+    @JsonProperty("number")
+    private Integer number;
+
+    @JsonProperty("method")
+    private String method;
 
     public String getFile() {
         return file;

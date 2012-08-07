@@ -9,7 +9,7 @@ import java.io.Serializable;
  */
 public class CrashLogRecord implements Serializable {
 
-    @JsonProperty
+    @JsonProperty("payload")
     private Payload payload;
 
     public CrashLogRecord() {

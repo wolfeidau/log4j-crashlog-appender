@@ -1,12 +1,12 @@
 package au.id.wolfe.log4j.crashlog;
 
-import au.id.wolfe.log4j.crashlog.json.SnakeCaseJsonProvider;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.sun.jersey.api.client.filter.GZIPContentEncodingFilter;
 import com.sun.jersey.client.apache4.ApacheHttpClient4Handler;
 import com.sun.jersey.client.apache4.config.ApacheHttpClient4Config;
 import com.sun.jersey.client.apache4.config.DefaultApacheHttpClient4Config;
 import org.apache.http.client.HttpClient;
+import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -32,7 +32,7 @@ public class JerseyClientFactory {
 
         final ApacheHttpClient4Handler handler = new ApacheHttpClient4Handler(client, null, true);
 
-        config.getSingletons().add(new SnakeCaseJsonProvider());
+        config.getSingletons().add(new JacksonJsonProvider());
 
         final JerseyClient jerseyClient = new JerseyClient(handler, config);
 

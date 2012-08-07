@@ -1,8 +1,12 @@
 package au.id.wolfe.log4j.crashlog;
 
+import au.id.wolfe.log4j.crashlog.auth.hmac.AuthHmacClientFilter;
+import au.id.wolfe.log4j.crashlog.auth.hmac.AuthHmacSecret;
 import au.id.wolfe.log4j.crashlog.data.*;
 import com.sun.jersey.api.client.Client;
 import org.apache.log4j.spi.LoggingEvent;
+
+import javax.ws.rs.core.MediaType;
 
 /**
  *
@@ -10,11 +14,35 @@ import org.apache.log4j.spi.LoggingEvent;
 public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
         implements org.apache.log4j.Appender {
 
-    private String crashLogURL;
+    private String crashLogURL = "https://stdin.crashlog.io/notify";
     private String crashAuthId;
     private String crashAuthKey;
 
     private JerseyClientFactory jerseyClientFactory = null;
+
+    public String getCrashLogURL() {
+        return crashLogURL;
+    }
+
+    public void setCrashLogURL(String crashLogURL) {
+        this.crashLogURL = crashLogURL;
+    }
+
+    public String getCrashAuthId() {
+        return crashAuthId;
+    }
+
+    public void setCrashAuthId(String crashAuthId) {
+        this.crashAuthId = crashAuthId;
+    }
+
+    public String getCrashAuthKey() {
+        return crashAuthKey;
+    }
+
+    public void setCrashAuthKey(String crashAuthKey) {
+        this.crashAuthKey = crashAuthKey;
+    }
 
     @Override
     protected void append(LoggingEvent event) {
@@ -27,6 +55,15 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
         buildEvent(crashLogRecord, event);
         buildNotifier(crashLogRecord, event);
         buildBackTrace(crashLogRecord, event);
+
+        Client jerseyClient = getClient();
+
+        jerseyClient.addFilter(new AuthHmacClientFilter(new AuthHmacSecret()
+                .accessId(crashAuthId)
+                .secret(crashAuthKey)));
+
+        jerseyClient.resource(crashLogURL).type(MediaType.APPLICATION_JSON)
+                .post(CrashLogResponse.class, crashLogRecord);
     }
 
     private void buildEvent(CrashLogRecord crashLogRecord, LoggingEvent loggingEvent) {
@@ -44,7 +81,6 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
         Notifier notifier = new Notifier();
         notifier.setName("log4j-crashlog-appender");
         notifier.setVersion("1.0.0");
-
         crashLogRecord.getPayload().setNotifier(notifier);
 
     }

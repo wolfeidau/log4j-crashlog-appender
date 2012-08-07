@@ -12,13 +12,13 @@ import java.util.Date;
  */
 public class Event implements Serializable {
 
-    @JsonProperty
+    @JsonProperty("message")
     private String message;
 
-    @JsonProperty
+    @JsonProperty("class_name")
     private String className;
 
-    @JsonProperty
+    @JsonProperty("created_at")
     private Date createdAt;
 
     public Event() {
