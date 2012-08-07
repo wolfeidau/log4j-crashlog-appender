@@ -1,6 +1,8 @@
 package au.id.wolfe.log4j.crashlog.data;
 
+import au.id.wolfe.log4j.crashlog.json.JsonISO8601DateSerializer;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -19,9 +21,16 @@ public class Event implements Serializable {
     private String className;
 
     @JsonProperty("created_at")
+    @JsonSerialize(using = JsonISO8601DateSerializer.class)
     private Date createdAt;
 
     public Event() {
+    }
+
+    public Event(String message, String className, Date createdAt) {
+        this.message = message;
+        this.className = className;
+        this.createdAt = createdAt;
     }
 
     public String getMessage() {

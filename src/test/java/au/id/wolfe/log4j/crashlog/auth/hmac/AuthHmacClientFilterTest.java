@@ -35,9 +35,7 @@ public class AuthHmacClientFilterTest extends ResourceTest {
         final CrashLogRecord crashLogRecord = new CrashLogRecord();
 
         crashLogRecord.setPayload(new Payload());
-        crashLogRecord.getPayload().setEvent(new Event());
-        crashLogRecord.getPayload().getEvent().setClassName("MyClass");
-        crashLogRecord.getPayload().getEvent().setCreatedAt(new Date());
+        crashLogRecord.getPayload().setEvent(new Event("Something happened", "MyClass", new Date()));
 
         client().addFilter(new AuthHmacClientFilter(authHmacSecret));
 

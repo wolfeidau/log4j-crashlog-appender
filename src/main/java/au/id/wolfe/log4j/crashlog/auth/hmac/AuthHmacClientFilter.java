@@ -5,11 +5,13 @@ import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.filter.ClientFilter;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
+import org.apache.http.util.EncodingUtils;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -52,7 +54,7 @@ public class AuthHmacClientFilter extends ClientFilter {
 
     private ClientRequest modifyRequest(ClientRequest clientRequest) throws NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
 
-        SecretKeySpec signingKey = new SecretKeySpec(authHmacSecret.getSecret().getBytes(), HMAC_SHA1_ALGORITHM);
+        SecretKeySpec signingKey = new SecretKeySpec(EncodingUtils.getBytes(authHmacSecret.getSecret(), "UTF-8"), HMAC_SHA1_ALGORITHM);
 
         // get an hmac_sha1 Mac instance and initialize with the signing key
         Mac mac = Mac.getInstance(HMAC_SHA1_ALGORITHM);
@@ -68,7 +70,7 @@ public class AuthHmacClientFilter extends ClientFilter {
         updatePrefixedHeaders(sb, clientRequest.getHeaders());
         updateRequestUri(sb, clientRequest);
 
-        Object signature = String.format("%s %s", "AWS", Base64.encode(mac.doFinal(sb.toString().getBytes())));
+        Object signature = String.format("%s %s", "AWS", Base64.encode(mac.doFinal(EncodingUtils.getBytes(sb.toString(), "UTF-8"))));
 
         clientRequest.getHeaders().put("Authorization", Arrays.asList(signature));
 

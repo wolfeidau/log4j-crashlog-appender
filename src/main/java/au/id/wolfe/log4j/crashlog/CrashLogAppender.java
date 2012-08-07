@@ -9,7 +9,7 @@ import org.apache.log4j.spi.LoggingEvent;
 import javax.ws.rs.core.MediaType;
 
 /**
- *
+ * Log4J appender for the http://crashlog.io service.
  */
 public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
         implements org.apache.log4j.Appender {

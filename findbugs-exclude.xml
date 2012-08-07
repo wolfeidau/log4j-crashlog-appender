@@ -1,3 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <FindBugsFilter>
+    <Match>
+        <Class name="au.id.wolfe.log4j.crashlog.auth.hmac.AuthHmacClientFilter" />
+    </Match>
+    <Match>
+        <Class name="au.id.wolfe.log4j.crashlog.data.Event" />
+    </Match>
 </FindBugsFilter>
