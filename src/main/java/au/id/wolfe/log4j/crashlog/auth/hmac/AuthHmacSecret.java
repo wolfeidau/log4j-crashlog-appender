@@ -1,7 +1,7 @@
 package au.id.wolfe.log4j.crashlog.auth.hmac;
 
 /**
- *
+ * Holds the attributes used to sign requests.
  */
 public class AuthHmacSecret {
 

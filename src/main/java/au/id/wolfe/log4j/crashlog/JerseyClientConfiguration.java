@@ -7,7 +7,7 @@ public class JerseyClientConfiguration extends HttpClientConfiguration {
 
     private boolean gzipEnabled = true;
     private int minThreads = 1;
-    private int maxThreads = 128;
+    private int maxThreads = 10;
 
     public JerseyClientConfiguration() {
     }

@@ -8,8 +8,8 @@ public class HttpClientConfiguration {
     private long timeout = 1000; // 1 second
     private long connectionTimeout = 10 * 60 * 1000; // 10 minutes
     private long keepAlive;
-    private int maxConnectionsPerRoute = 1024;
-    private int maxConnections = 1024;
+    private int maxConnectionsPerRoute = 10;
+    private int maxConnections = 10;
 
     public HttpClientConfiguration() {
     }

@@ -4,20 +4,19 @@ import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.filter.ClientFilter;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
+import com.sun.jersey.core.util.Base64;
 import org.apache.http.util.EncodingUtils;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
- *
+ * Jersey client filter which signs each request using SHA1 HMAC.
  */
 public class AuthHmacClientFilter extends ClientFilter {
 
@@ -70,7 +69,7 @@ public class AuthHmacClientFilter extends ClientFilter {
         updatePrefixedHeaders(sb, clientRequest.getHeaders());
         updateRequestUri(sb, clientRequest);
 
-        Object signature = String.format("%s %s", "AWS", Base64.encode(mac.doFinal(EncodingUtils.getBytes(sb.toString(), "UTF-8"))));
+        Object signature = String.format("%s %s", "AWS", new String(Base64.encode(mac.doFinal(EncodingUtils.getBytes(sb.toString(), "UTF-8")))));
 
         clientRequest.getHeaders().put("Authorization", Arrays.asList(signature));
 
