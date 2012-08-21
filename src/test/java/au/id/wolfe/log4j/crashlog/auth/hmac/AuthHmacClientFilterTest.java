@@ -9,11 +9,6 @@ import org.junit.Test;
  */
 public class AuthHmacClientFilterTest extends ResourceTest {
 
-    private final AuthHmacSecret authHmacSecret = new AuthHmacSecret()
-            .accessId("44CF9590006BF252F707")
-            .secret("OtxrzxIsfpFjA7SwPzILwy8Bw21TLhquhboDYROV");
-
-
     @Override
     protected void setUpResources() {
         addResource(new CrashLogResource());
