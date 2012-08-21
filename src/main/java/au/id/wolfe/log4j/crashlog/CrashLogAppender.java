@@ -85,10 +85,13 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
                 .build());
 
         ObjectMapper mapper = new ObjectMapper();
+        mapper.writer(new SimpleDateFormat(DATE_FORMAT));
 
         try {
 
             post.setEntity(new StringEntity(mapper.writeValueAsString(crashLogRecord), ContentType.APPLICATION_JSON));
+
+            System.out.println(post.toString());
 
             HttpResponse response = httpClient.execute(post);
 
