@@ -1,13 +1,22 @@
 package au.id.wolfe.log4j.crashlog;
 
-import au.id.wolfe.log4j.crashlog.auth.hmac.AuthHmacClientFilter;
-import au.id.wolfe.log4j.crashlog.auth.hmac.AuthHmacSecret;
-import au.id.wolfe.log4j.crashlog.data.*;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.filter.LoggingFilter;
+import au.id.wolfe.log4j.crashlog.auth.hmac.HmacBuilder;
+import au.id.wolfe.log4j.crashlog.data.BackTraceEntry;
+import au.id.wolfe.log4j.crashlog.data.CrashLogRecord;
+import au.id.wolfe.log4j.crashlog.data.Event;
+import au.id.wolfe.log4j.crashlog.data.Notifier;
+import au.id.wolfe.log4j.crashlog.data.Payload;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.log4j.spi.LoggingEvent;
+import org.codehaus.jackson.map.ObjectMapper;
 
-import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Log4J appender for the http://crashlog.io service.
@@ -19,7 +28,12 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
     private String crashAuthId;
     private String crashAuthKey;
 
-    private JerseyClientFactory jerseyClientFactory = null;
+    private static final String contentType = "application/json";
+    private final static String DATE_FORMAT = "EEE, d MMM yyyy HH:mm:ss z";
+
+    private final HmacBuilder hmacBuilder = new HmacBuilder();
+
+    private HttpClientFactory httpClientFactory = null;
 
     public String getCrashLogURL() {
         return crashLogURL;
@@ -59,19 +73,32 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
         buildNotifier(crashLogRecord, event);
         buildBackTrace(crashLogRecord, event);
 
-        Client jerseyClient = getClient();
+        HttpClient httpClient = getClient();
 
-        jerseyClient.addFilter(new LoggingFilter());
+        HttpPost post = new HttpPost(crashLogURL);
 
-        jerseyClient.addFilter(new AuthHmacClientFilter(new AuthHmacSecret()
-                .accessId(crashAuthId)
-                .secret(crashAuthKey)));
+        post.addHeader("hmac", crashAuthId + ":" + hmacBuilder.init(crashAuthKey)
+                .append(post.getMethod() + "\n")
+                .append(contentType + "\n")
+                .append(getCurrentDate() + "\n")
+                .append(post.getURI() + "\n")
+                .build());
 
-        CrashLogResponse crashLogResponse = jerseyClient.resource(crashLogURL)
-                .type(MediaType.APPLICATION_JSON)
-                .post(CrashLogResponse.class, crashLogRecord);
+        ObjectMapper mapper = new ObjectMapper();
 
-        System.out.println("event sent " + crashLogResponse.toString());
+        try {
+
+            post.setEntity(new StringEntity(mapper.writeValueAsString(crashLogRecord), ContentType.APPLICATION_JSON));
+
+            HttpResponse response = httpClient.execute(post);
+
+            System.out.println("client StatusCode: " + response.getStatusLine().getStatusCode() + " content: " + response.getStatusLine().getReasonPhrase());
+
+        } catch (IOException e) {
+            System.out.println("Error while sending exception to crashlog: " + e.getMessage());
+        } finally {
+            post.releaseConnection();
+        }
 
     }
 
@@ -109,6 +136,10 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
         }
     }
 
+    private String getCurrentDate() {
+        return new SimpleDateFormat(DATE_FORMAT).format(new Date());
+    }
+
     @Override
     public void close() {
 
@@ -119,13 +150,13 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
         return false;
     }
 
-    private Client getClient() {
+    private HttpClient getClient() {
 
-        if (jerseyClientFactory == null) {
-            JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();
-            jerseyClientFactory = new JerseyClientFactory(jerseyClientConfiguration);
+        if (httpClientFactory == null) {
+            HttpClientConfiguration httpClientConfiguration = new HttpClientConfiguration();
+            httpClientFactory = new HttpClientFactory(httpClientConfiguration);
         }
 
-        return jerseyClientFactory.build();
+        return httpClientFactory.build();
     }
 }
