@@ -3,7 +3,7 @@ package au.id.wolfe.log4j.crashlog.data;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
- *
+ * Root element of the crashlog response.
  */
 public class CrashLogResponse {
 

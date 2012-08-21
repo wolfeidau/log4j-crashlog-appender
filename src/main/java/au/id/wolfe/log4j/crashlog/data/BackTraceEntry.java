@@ -5,7 +5,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import java.io.Serializable;
 
 /**
- *
+ * Contains a backtrace entry, which matches the entries in a java stack trace.
  */
 public class BackTraceEntry implements Serializable {
 

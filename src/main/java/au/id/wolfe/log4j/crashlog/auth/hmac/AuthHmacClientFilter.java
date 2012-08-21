@@ -17,7 +17,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
- *
+ * Jersey Client filter which builds a hmac for a given client request.
  */
 public class AuthHmacClientFilter extends ClientFilter {
 

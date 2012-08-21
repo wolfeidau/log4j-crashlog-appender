@@ -4,6 +4,7 @@ import au.id.wolfe.log4j.crashlog.auth.hmac.AuthHmacClientFilter;
 import au.id.wolfe.log4j.crashlog.auth.hmac.AuthHmacSecret;
 import au.id.wolfe.log4j.crashlog.data.*;
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.filter.LoggingFilter;
 import org.apache.log4j.spi.LoggingEvent;
 
 import javax.ws.rs.core.MediaType;
@@ -47,6 +48,8 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
     @Override
     protected void append(LoggingEvent event) {
 
+        System.out.println("event logged " + event.toString());
+
         CrashLogRecord crashLogRecord = new CrashLogRecord();
 
         crashLogRecord.setPayload(new Payload());
@@ -58,12 +61,18 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
 
         Client jerseyClient = getClient();
 
+        jerseyClient.addFilter(new LoggingFilter());
+
         jerseyClient.addFilter(new AuthHmacClientFilter(new AuthHmacSecret()
                 .accessId(crashAuthId)
                 .secret(crashAuthKey)));
 
-        jerseyClient.resource(crashLogURL).type(MediaType.APPLICATION_JSON)
+        CrashLogResponse crashLogResponse = jerseyClient.resource(crashLogURL)
+                .type(MediaType.APPLICATION_JSON)
                 .post(CrashLogResponse.class, crashLogRecord);
+
+        System.out.println("event sent " + crashLogResponse.toString());
+
     }
 
     private void buildEvent(CrashLogRecord crashLogRecord, LoggingEvent loggingEvent) {

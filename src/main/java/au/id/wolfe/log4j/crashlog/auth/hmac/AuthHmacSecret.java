@@ -1,7 +1,7 @@
 package au.id.wolfe.log4j.crashlog.auth.hmac;
 
 /**
- *
+ * Used by AuthHmacClientFilter to hold the authentication credentials.
  */
 public class AuthHmacSecret {
 

@@ -5,7 +5,7 @@ package au.id.wolfe.log4j.crashlog;
  */
 public class JerseyClientConfiguration extends HttpClientConfiguration {
 
-    private boolean gzipEnabled = true;
+    private boolean gzipEnabled = false;
     private int minThreads = 1;
     private int maxThreads = 128;
 

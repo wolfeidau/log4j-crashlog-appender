@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- *
+ * payload element of the crashlog event.
  */
 public class Payload implements Serializable {
 

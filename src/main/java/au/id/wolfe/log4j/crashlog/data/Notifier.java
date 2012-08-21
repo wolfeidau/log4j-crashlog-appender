@@ -5,7 +5,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import java.io.Serializable;
 
 /**
- *
+ * Information about the logger which is performing notifications.
  */
 public class Notifier implements Serializable {
 

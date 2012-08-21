@@ -11,6 +11,7 @@ import java.net.URI;
  *
  */
 public class JerseyClient extends ApacheHttpClient4 {
+
     public JerseyClient(ApacheHttpClient4Handler root, ClientConfig config) {
         super(root, config);
     }
