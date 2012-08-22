@@ -36,6 +36,11 @@ public class HmacBuilder {
         return this;
     }
 
+    public HmacBuilder appendLine(String data) {
+        mac.update((String.format("%s\n", data)).getBytes());
+        return this;
+    }
+
     public HmacBuilder append(String data) {
         mac.update((data).getBytes());
         return this;

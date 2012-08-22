@@ -11,6 +11,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.log4j.spi.ErrorCode;
 import org.apache.log4j.spi.LoggingEvent;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -31,7 +32,7 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
     private static final String contentType = "application/json";
     private final static String DATE_FORMAT = "EEE, d MMM yyyy HH:mm:ss z";
 
-    private final HmacBuilder hmacBuilder = new HmacBuilder();
+    private HmacBuilder hmacBuilder = null;
 
     private HttpClientFactory httpClientFactory = null;
 
@@ -77,11 +78,11 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
 
         HttpPost post = new HttpPost(crashLogURL);
 
-        post.addHeader("hmac", crashAuthId + ":" + hmacBuilder.init(crashAuthKey)
-                .append(post.getMethod() + "\n")
-                .append(contentType + "\n")
-                .append(getCurrentDate() + "\n")
-                .append(post.getURI() + "\n")
+        post.addHeader("Authorization", "AuthHMAC " + crashAuthId + ":" + getHmacBuilder().init(crashAuthKey)
+                .appendLine(post.getMethod())
+                .appendLine(contentType)
+                .appendLine(getCurrentDate())
+                .append(post.getURI().toString())
                 .build());
 
         ObjectMapper mapper = new ObjectMapper();
@@ -98,7 +99,7 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
             System.out.println("client StatusCode: " + response.getStatusLine().getStatusCode() + " content: " + response.getStatusLine().getReasonPhrase());
 
         } catch (IOException e) {
-            System.out.println("Error while sending exception to crashlog: " + e.getMessage());
+            errorHandler.error(e.getMessage(), e, ErrorCode.WRITE_FAILURE);
         } finally {
             post.releaseConnection();
         }
@@ -151,6 +152,15 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
     @Override
     public boolean requiresLayout() {
         return false;
+    }
+
+    private HmacBuilder getHmacBuilder() {
+
+        if (hmacBuilder == null) {
+            hmacBuilder = new HmacBuilder();
+        }
+
+        return hmacBuilder;
     }
 
     private HttpClient getClient() {
