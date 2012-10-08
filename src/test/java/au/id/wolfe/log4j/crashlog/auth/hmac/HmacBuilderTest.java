@@ -25,4 +25,20 @@ public class HmacBuilderTest {
                 .append("/quotes/nelson").build(),
                 is("jZNOcbfWmD/A/f3hSvVzXZjM2HU="));
     }
+
+    @Test
+    public void testShortBuild() throws Exception {
+
+        HmacBuilder hmacBuilder = new HmacBuilder();
+
+        hmacBuilder.init("secret");
+
+        assertThat(hmacBuilder.appendLine("PUT")
+                .appendLine("text/plain")
+                .appendLine("blahblah")
+                .appendLine("Thu, 10 Jul 2008 03:29:56 GMT")
+                .append("/path/to/put").build(),
+                is("71wAJM4IIu/3o6lcqx/tw7XnAJs="));
+    }
+
 }

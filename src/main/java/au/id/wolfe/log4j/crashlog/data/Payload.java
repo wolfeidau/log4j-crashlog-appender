@@ -17,7 +17,7 @@ public class Payload implements Serializable {
     @JsonProperty
     private Event event;
 
-    @JsonProperty("back_trace")
+    @JsonProperty("backtrace")
     private List<BackTraceEntry> backTrace = new LinkedList<BackTraceEntry>();
 
     public Payload() {

@@ -16,8 +16,10 @@ import org.apache.log4j.spi.LoggingEvent;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Log4J appender for the http://crashlog.io service.
@@ -25,11 +27,14 @@ import java.util.Date;
 public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
         implements org.apache.log4j.Appender {
 
-    private String crashLogURL = "https://stdin.crashlog.io/notify";
+    private String crashLogURL = "https://stdin.crashlog.io/events";
     private String crashAuthId;
     private String crashAuthKey;
+    private String serviceId = "CrashLog";
+    private String projectName = "Test";
 
-    private static final String contentType = "application/json";
+    //private static final String contentType = "application/json";
+    private static final String contentType = "application/json; charset=UTF-8";
     private final static String DATE_FORMAT = "EEE, d MMM yyyy HH:mm:ss z";
 
     private HmacBuilder hmacBuilder = null;
@@ -60,6 +65,22 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
         this.crashAuthKey = crashAuthKey;
     }
 
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
     @Override
     protected void append(LoggingEvent event) {
 
@@ -78,19 +99,40 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
 
         HttpPost post = new HttpPost(crashLogURL);
 
-        post.addHeader("Authorization", "AuthHMAC " + crashAuthId + ":" + getHmacBuilder().init(crashAuthKey)
-                .appendLine(post.getMethod())
-                .appendLine(contentType)
-                .appendLine(getCurrentDate())
-                .append(post.getURI().toString())
-                .build());
+        String dateString = getCurrentDate();
+
+        String canonicalRequest = "POST\n" +
+                contentType + "\n\n" +
+                dateString + "\n" +
+                post.getURI().getPath();
+
+/*
+        post.addHeader("Authorization", serviceId + " " + crashAuthId + ":" +
+                getHmacBuilder().init(crashAuthKey)
+                        .appendLine(post.getMethod())
+                        .appendLine(contentType)
+                        .appendLine(dateString)
+                        .append(post.getURI().toString())
+                        .build());
+*/
+
+        System.out.println(canonicalRequest);
+
+        post.addHeader("Authorization", serviceId + " " + crashAuthId + ":" +
+                getHmacBuilder().init(crashAuthKey)
+                        .append(canonicalRequest)
+                        .build());
+
+        post.addHeader("Date", dateString);
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.writer(new SimpleDateFormat(DATE_FORMAT));
 
         try {
 
-            post.setEntity(new StringEntity(mapper.writeValueAsString(crashLogRecord), ContentType.APPLICATION_JSON));
+            String postBody = mapper.writeValueAsString(crashLogRecord);
+
+            post.setEntity(new StringEntity(postBody, ContentType.APPLICATION_JSON));
 
             System.out.println(post.toString());
 
@@ -112,6 +154,7 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
 
         crashLogEvent.setClassName(loggingEvent.getLocationInformation().getClass().getName());
         crashLogEvent.setMessage(loggingEvent.getMessage().toString()); // TODO may need to take into consideration escaping
+        crashLogEvent.setCreatedAt(getDate(loggingEvent.getTimeStamp()));
 
         crashLogRecord.getPayload().setEvent(crashLogEvent);
     }
@@ -141,7 +184,18 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
     }
 
     private String getCurrentDate() {
-        return new SimpleDateFormat(DATE_FORMAT).format(new Date());
+
+        DateFormat df = new SimpleDateFormat(DATE_FORMAT);
+        df.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        return df.format(new Date());
+    }
+
+    private String getDate(long timestamp) {
+
+        timestamp = timestamp / 1000;
+
+        return String.valueOf(timestamp);
     }
 
     @Override

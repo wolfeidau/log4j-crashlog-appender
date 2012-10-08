@@ -17,17 +17,16 @@ public class Event implements Serializable {
     @JsonProperty("message")
     private String message;
 
-    @JsonProperty("class_name")
+    @JsonProperty("type")
     private String className;
 
-    @JsonProperty("created_at")
-    @JsonSerialize(using = JsonISO8601DateSerializer.class)
-    private Date createdAt;
+    @JsonProperty("timestamp")
+    private String createdAt;
 
     public Event() {
     }
 
-    public Event(String message, String className, Date createdAt) {
+    public Event(String message, String className, String createdAt) {
         this.message = message;
         this.className = className;
         this.createdAt = createdAt;
@@ -49,11 +48,11 @@ public class Event implements Serializable {
         this.className = className;
     }
 
-    public Date getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
 }
