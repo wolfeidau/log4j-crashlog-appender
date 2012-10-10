@@ -10,6 +10,6 @@ To configure this logger using a property file.
     log4j.appender.CRASHLOG.ProjectName=[PROJECT NAME]
     log4j.appender.CRASHLOG.Threshold=ERROR
 
-Links
+# Links
 
 [CrashLog Site](http://crashlog.io)
