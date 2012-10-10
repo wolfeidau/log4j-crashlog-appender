@@ -8,6 +8,15 @@
     <name>log4j-crashlog-appender</name>
     <description>A log4j appender for the crashlog service.</description>
 
+    <licenses>
+        <license>
+            <name>Apache 2</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+
     <developers>
         <developer>
             <name>Mark Wolfe</name>
