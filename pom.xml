@@ -175,4 +175,19 @@
         <jackson.version>1.9.9</jackson.version>
     </properties>
 
+    <scm>
+        <connection>scm:git:ssh://git@github.com:wolfeidau/log4j-crashlog-appender.git</connection>
+        <url>scm:git:ssh://git@github.com/wolfeidau/log4j-crashlog-appender.git</url>
+        <developerConnection>scm:git:ssh://git@github.com/wolfeidau/log4j-crashlog-appender.git</developerConnection>
+    </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>wolfeidau.repo</id>
+            <name>Mark Wolfe's Repository</name>
+            <url>scp://repo.wolfe.id.au/home/markw/repository</url>
+            <layout>default</layout>
+        </repository>
+    </distributionManagement>
+
 </project>
