@@ -1,7 +1,7 @@
 package au.id.wolfe.log4j.crashlog;
 
 /**
- *
+ * HTTP Client Configuration
  */
 public class HttpClientConfiguration {
 

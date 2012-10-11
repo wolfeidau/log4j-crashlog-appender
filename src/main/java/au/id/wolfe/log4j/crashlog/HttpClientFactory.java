@@ -18,7 +18,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.protocol.HttpContext;
 
 /**
- *
+ * HTTP Client Factory which controls how connections are created and configured.
  */
 public class HttpClientFactory {
 
@@ -86,7 +86,6 @@ public class HttpClientFactory {
     }
 
     protected ClientConnectionManager createConnectionManage(SchemeRegistry registry, DnsResolver resolver) {
-        //final long ttl = configuration.getTimeToLive()
 
         final PoolingClientConnectionManager clientConnectionManager = new PoolingClientConnectionManager();
 

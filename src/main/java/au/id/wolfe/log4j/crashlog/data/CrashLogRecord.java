@@ -5,7 +5,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import java.io.Serializable;
 
 /**
- * Root element of the crashlog request.
+ * Root element of the CrashLog request.
  */
 public class CrashLogRecord implements Serializable {
 

@@ -28,13 +28,16 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
         implements org.apache.log4j.Appender {
 
     private String crashLogURL = "https://stdin.crashlog.io/events";
+
     private String crashAuthId;
     private String crashAuthKey;
     private String serviceId = "CrashLog";
     private String projectName = "Test";
 
-    //private static final String contentType = "application/json";
+    // At the moment the HTTP client is appending the charset to the content type,
+    // not really ideal in this case, however it is correct.
     private static final String contentType = "application/json; charset=UTF-8";
+
     private final static String DATE_FORMAT = "EEE, d MMM yyyy HH:mm:ss z";
 
     private HmacBuilder hmacBuilder = null;
@@ -84,8 +87,6 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
     @Override
     protected void append(LoggingEvent event) {
 
-        System.out.println("event logged " + event.toString());
-
         CrashLogRecord crashLogRecord = new CrashLogRecord();
 
         crashLogRecord.setPayload(new Payload());
@@ -106,18 +107,6 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
                 dateString + "\n" +
                 post.getURI().getPath();
 
-/*
-        post.addHeader("Authorization", serviceId + " " + crashAuthId + ":" +
-                getHmacBuilder().init(crashAuthKey)
-                        .appendLine(post.getMethod())
-                        .appendLine(contentType)
-                        .appendLine(dateString)
-                        .append(post.getURI().toString())
-                        .build());
-*/
-
-        System.out.println(canonicalRequest);
-
         post.addHeader("Authorization", serviceId + " " + crashAuthId + ":" +
                 getHmacBuilder().init(crashAuthKey)
                         .append(canonicalRequest)
@@ -126,7 +115,6 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
         post.addHeader("Date", dateString);
 
         ObjectMapper mapper = new ObjectMapper();
-        mapper.writer(new SimpleDateFormat(DATE_FORMAT));
 
         try {
 
@@ -134,11 +122,11 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
 
             post.setEntity(new StringEntity(postBody, ContentType.APPLICATION_JSON));
 
-            System.out.println(post.toString());
-
             HttpResponse response = httpClient.execute(post);
 
-            System.out.println("client StatusCode: " + response.getStatusLine().getStatusCode() + " content: " + response.getStatusLine().getReasonPhrase());
+            if (response.getStatusLine().getStatusCode() != 200){
+                errorHandler.error(response.getStatusLine().getReasonPhrase(), null, ErrorCode.WRITE_FAILURE);
+            }
 
         } catch (IOException e) {
             errorHandler.error(e.getMessage(), e, ErrorCode.WRITE_FAILURE);
@@ -154,7 +142,7 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
 
         crashLogEvent.setClassName(loggingEvent.getLocationInformation().getClass().getName());
         crashLogEvent.setMessage(loggingEvent.getMessage().toString()); // TODO may need to take into consideration escaping
-        crashLogEvent.setCreatedAt(getDate(loggingEvent.getTimeStamp()));
+        crashLogEvent.setCreatedAt(geTimestamp(loggingEvent.getTimeStamp()));
 
         crashLogRecord.getPayload().setEvent(crashLogEvent);
     }
@@ -165,21 +153,20 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
         notifier.setName("log4j-crashlog-appender");
         notifier.setVersion("1.0.0");
         crashLogRecord.getPayload().setNotifier(notifier);
-
     }
 
     private void buildBackTrace(CrashLogRecord crashLogRecord, LoggingEvent loggingEvent) {
+
         if (loggingEvent.getThrowableInformation() != null) {
 
-            Throwable throwable = loggingEvent.getThrowableInformation().getThrowable();
-
-            for (StackTraceElement stackTraceElement : throwable.getStackTrace()) {
+            for (StackTraceElement stackTraceElement : loggingEvent.getThrowableInformation().getThrowable().getStackTrace()) {
                 BackTraceEntry backTraceEntry = new BackTraceEntry();
                 backTraceEntry.setFile(stackTraceElement.getFileName());
                 backTraceEntry.setMethod(stackTraceElement.getMethodName());
                 backTraceEntry.setNumber(stackTraceElement.getLineNumber());
                 crashLogRecord.getPayload().getBackTrace().add(backTraceEntry);
             }
+
         }
     }
 
@@ -191,11 +178,8 @@ public class CrashLogAppender extends org.apache.log4j.AppenderSkeleton
         return df.format(new Date());
     }
 
-    private String getDate(long timestamp) {
-
-        timestamp = timestamp / 1000;
-
-        return String.valueOf(timestamp);
+    private String geTimestamp(long timestamp) {
+        return String.valueOf(timestamp / 1000);
     }
 
     @Override

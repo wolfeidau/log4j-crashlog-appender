@@ -1,11 +1,8 @@
 package au.id.wolfe.log4j.crashlog.data;
 
-import au.id.wolfe.log4j.crashlog.json.JsonISO8601DateSerializer;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * "message" : "Some one line error description",
