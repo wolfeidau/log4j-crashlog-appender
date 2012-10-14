@@ -18,6 +18,7 @@ public class AuthHmacClientFilterTest extends ResourceTest {
     public void testHandle() throws Exception {
 
 /*
+        TODO Need to re implement integration testing with newly updated params / headers
         final CrashLogRecord crashLogRecord = new CrashLogRecord();
 
         crashLogRecord.setPayload(new Payload());
